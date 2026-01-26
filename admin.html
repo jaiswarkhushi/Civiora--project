@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civiora - Admin Control Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f4f4f4; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #bd9537 0%, #f9f295 50%, #b8860b 100%);
+            padding: 40px 20px;
+            text-align: center;
+            border-bottom: 2px solid #fff;
+        }
+
+        .header h1 { color: #1a1a1a; font-size: 42px; font-weight: 900; letter-spacing: 1px; }
+        .header p { color: #333; font-weight: 700; font-size: 12px; text-transform: uppercase; margin-top: 5px; }
+
+        .content { padding: 30px 40px; }
+        h2 { color: #2c3e50; margin-bottom: 25px; text-align: center; font-size: 22px; font-weight: 600; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 700; color: #34495e; }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus { border-color: #bd9537; outline: none; background: #fffdf5; }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 16px;
+            margin-top: 10px;
+            background: linear-gradient(to bottom, #d4af37, #b8860b);
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .btn:hover { transform: scale(1.02); }
+
+        .link { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+        .link a { color: #b8860b; text-decoration: none; font-weight: 700; cursor: pointer; }
+
+        .message { padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 14px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Civiora</h1>
+            <p>Build for better society living!!</p>
+        </div>
+
+        <div class="content">
+            <h2>Create Admin Account</h2>
+            
+            <div id="adminMessage" class="message"></div>
+
+            <form id="adminSignupForm">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="adminName" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label>Official Email</label>
+                    <input type="email" id="adminEmail" required placeholder="admin@civiora.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Management Role</label>
+                    <select id="adminRole" required>
+                        <option value="" disabled selected>Select Admin Position</option>
+                        <option value="Chairman">Chairman</option>
+                        <option value="Secretary">Secretary</option>
+                        <option value="Treasurer">Treasurer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <input type="password" id="adminPassword" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn">REGISTER ADMIN</button>
+            </form>
+
+            <div class="link">
+                Already have an account? <a onclick="window.location.href='login.html'">Login here</a>
+            </div>
+            <div class="link">
+                <a onclick="window.location.href='home.html'" style="color: #b8860b; text-decoration: none; font-weight: bold;">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("adminSignupForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const adminData = {
+                name: document.getElementById("adminName").value,
+                email: document.getElementById("adminEmail").value,
+                role: document.getElementById("adminRole").value,
+                password: document.getElementById("adminPassword").value
+            };
+
+            const msg = document.getElementById("adminMessage");
+
+            try {
+                // UPDATED TO PORT 8080
+                const response = await fetch("http://localhost:8080/admin-register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(adminData)
+                });
+                
+                const result = (await response.text()).trim();
+                
+                if (result.includes("Successfully")) {
+                    msg.style.display = "block";
+                    msg.style.color = "#155724";
+                    msg.style.backgroundColor = "#d4edda";
+                    msg.style.border = "1px solid #c3e6cb";
+                    msg.innerText = "Admin Account Created! Redirecting...";
+                    setTimeout(() => window.location.href = "login.html", 2000);
+                } else {
+                    msg.style.display = "block";
+                    msg.style.color = "#721c24";
+                    msg.style.backgroundColor = "#f8d7da";
+                    msg.style.border = "1px solid #f5c6cb";
+                    msg.innerText = result;
+                }
+            } catch (err) {
+                msg.style.display = "block";
+                msg.style.color = "#721c24";
+                msg.innerText = "Connection error. Is your server running on port 8080?";
+                console.error("Connection error:", err);
+            }
+        });
+    </script>
+</body>
+</html>

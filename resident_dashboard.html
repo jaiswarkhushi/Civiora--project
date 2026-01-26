@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civiora - Resident Dashboard</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#">My Profile</a>
+        <a href="#">Settings</a>
+        <a onclick="logout()" style="cursor: pointer;">Logout</a>
+    </div>
+
+    <div class="top">
+        <img src="image_715974.jpg" alt="Civiora Logo" class="logo-img">
+        <h1>Civiora</h1>
+        <p>Build for better society living!!</p>
+    </div>
+
+    <div class="bottom">
+        <div class="dashboard-grid">
+            <div class="card" onclick="location.href='payment.html'">
+                <div class="task-logo">💳</div>
+                <b>Payment</b>
+                <p>Pay your monthly maintenance securely.</p>
+            </div>
+
+            <div class="card" onclick="location.href='notices.html'">
+                <div class="task-logo">📢</div>
+                <b>E-Notice</b>
+                <p>Check the latest society announcements.</p>
+            </div>
+
+            <div class="card" onclick="location.href='history.html'">
+                <div class="task-logo">📜</div>
+                <b>Payment History</b>
+                <p>View and download your past receipts.</p>
+            </div>
+
+            <div class="card" onclick="location.href='accounts.html'">
+                <div class="task-logo">📊</div>
+                <b>Annual Account</b>
+                <p>Review the society's yearly financial audit.</p>
+            </div>
+
+            <div class="card" onclick="location.href='booking.html'">
+                <div class="task-logo">🏢</div>
+                <b>Booking</b>
+                <p>Book the Clubhouse or Party Hall.</p>
+            </div>
+
+            <div class="card" onclick="location.href='chat.html'">
+                <div class="task-logo">💬</div>
+                <b>Chat</b>
+                <p>Discuss issues with other residents.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. INJECT INTERNAL CSS
+        const style = document.createElement('style');
+        style.textContent = `
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                background-color: #ffffff; 
+                color: #333;
+                min-height: 100vh;
+            }
+
+            .navbar {
+                padding: 15px;
+                display: block;
+                text-align: right;
+                background-color: #ffffff;
+                border-bottom: 1px solid #eee;
+            }
+            .navbar a {
+                color: #b8860b;
+                text-decoration: none;
+                font-size: 16px;
+                font-weight: 700;
+                margin-right: 25px;
+            }
+
+            .top {
+                display: block;
+                text-align: center;
+                padding: 50px 20px;
+                background: linear-gradient(135deg, #bd9537 0%, #f9f295 50%, #b8860b 100%);
+                color: #1a1a1a;
+            }
+            
+            .logo-img {
+                width: 80px;
+                height: 80px;
+                border-radius: 60%;
+                object-fit: cover;
+                margin-bottom: 20px;
+                border: 3px solid #bd9537;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+
+            h1 {
+                font-size: 48px;
+                font-weight: 900;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+            }
+
+            .bottom {
+                display: block;
+                padding: 50px 20px;
+                max-width: 1200px;
+                margin: 0 auto;
+            }
+
+            .dashboard-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 30px;
+                justify-items: center;
+            }
+
+            .card {
+                background-color: #ffffff;
+                border-radius: 15px;
+                width: 100%;
+                max-width: 340px;
+                padding: 35px 25px;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                border: 1px solid #f0f0f0;
+                transition: 0.4s ease;
+                cursor: pointer;
+            }
+
+            .card:hover {
+                transform: translateY(-8px);
+                border-color: #bd9537;
+                box-shadow: 0 15px 35px rgba(184, 134, 11, 0.15);
+            }
+
+            .task-logo {
+                font-size: 40px;
+                margin-bottom: 15px;
+                display: inline-block;
+                padding: 15px;
+                background: #fffdf5;
+                border-radius: 50%;
+            }
+
+            .card b {
+                display: block;
+                font-size: 20px;
+                margin-bottom: 10px;
+                color: #1a1a1a;
+            }
+
+            .card p {
+                font-size: 14px;
+                color: #666;
+                line-height: 1.5;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 2. DASHBOARD LOGIC (Updated to port 8080)
+        async function fetchDashboardData() {
+            try {
+                // CHANGED: Port set to 8080
+                const response = await fetch("http://localhost:8080/dashboard-data", {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await response.json();
+                console.log("Dashboard initialized on port 8080", data);
+            } catch (error) {
+                console.error("Connection failed on localhost:8080");
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+
+        // Initialize connection on load
+        window.onload = fetchDashboardData;
+    </script>
+</body>
+</html>

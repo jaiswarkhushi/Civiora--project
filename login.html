@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civiora - Member Login</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 450px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1); 
+            border: 1px solid #f0f0f0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #bd9537 0%, #f9f295 25%, #e2b13c 50%, #f9f295 75%, #b8860b 100%);
+            padding: 30px;
+            text-align: center;
+            border-bottom: 4px solid #a67c00;
+        }
+
+        .header h1 { color: #1a1a1a; font-size: 36px; letter-spacing: 3px; font-weight: 800; }
+        .header p { color: #333; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .content { padding: 35px; }
+        h2 { color: #333; margin-bottom: 25px; text-align: center; font-weight: 600; }
+
+        .form-group { margin-bottom: 18px; }
+        .form-row { display: flex; gap: 15px; }
+        
+        .form-row .form-group:first-child { flex: 1; }
+        .form-row .form-group:last-child { flex: 2; }
+        
+        label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: #444; }
+        
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1.5px solid #ddd;
+            border-radius: 6px;
+            transition: 0.3s;
+            font-size: 14px;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus { border-color: #bd9537; outline: none; background-color: #fffdf5; }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-top: 15px;
+            background: linear-gradient(135deg, #bd9537 0%, #f9f295 50%, #b8860b 100%);
+            color: #1a1a1a;
+            box-shadow: 0 4px 15px rgba(184, 134, 11, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(184, 134, 11, 0.6); }
+
+        .link { text-align: center; margin-top: 18px; font-size: 13px; color: #666; }
+        .link a { color: #b8860b; text-decoration: none; font-weight: 700; cursor: pointer; }
+        .link a:hover { text-decoration: underline; }
+
+        .message { padding: 12px; border-radius: 6px; margin-bottom: 20px; display: none; font-size: 14px; text-align: center; }
+        .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; display: block; }
+        .message.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Civiora</h1>
+            <p>Build for better society living!!</p>
+        </div>
+
+        <div class="content">
+            <h2>Member Login</h2>
+            
+            <div id="loginMessage" class="message"></div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Full Name / Username</label>
+                    <input type="text" id="loginUser" required placeholder="Enter your name">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Wing</label>
+                        <select id="loginWing" required>
+                            <option value="" disabled selected>Select</option>
+                            <option value="A"> A</option>
+                            <option value="B"> B</option>
+                            <option value="C"> C</option>
+                            <option value="D"> D</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Flat No.</label>
+                        <input type="text" id="loginFlat" required placeholder="101">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="loginRole" required>
+                        <option value="" disabled selected>Select Role</option>
+                        <option value="owner">Owner</option>
+                        <option value="tenant">Tenant</option>
+                        <option value="treasurer">Treasurer</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn">Login </button>
+            </form>
+
+            <div class="link">
+                Don't have an account? <a onclick="window.location.href='signup.html'">Sign Up</a>
+            </div>
+            <div class="link">
+                <a onclick="window.location.href='home.html'">← Back to Home</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const showMessage = (text, type) => {
+            const msg = document.getElementById("loginMessage");
+            msg.innerText = text;
+            msg.className = "message " + type;
+        };
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const loginData = {
+                username: document.getElementById("loginUser").value,
+                wing: document.getElementById("loginWing").value,
+                flat: document.getElementById("loginFlat").value,
+                role: document.getElementById("loginRole").value,
+                password: document.getElementById("loginPassword").value
+            };
+
+            try {
+                // Updated to localhost:8080
+                const response = await fetch("http://localhost:8080/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(loginData)
+                });
+
+                const result = (await response.text()).trim();
+                
+                if (/^\d+$/.test(result)) {
+                    showMessage("Access Granted! Redirecting...", "success");
+                    localStorage.setItem("userId", result);
+                    localStorage.setItem("role", loginData.role);
+
+                    setTimeout(() => {
+                        const role = loginData.role;
+                        if (role === "admin") window.location.href = "admin_dash.html";
+                        else if (role === "treasurer") window.location.href = "treasurer_dash.html";
+                        else window.location.href = "resident_dash.html";
+                    }, 1000);
+                } else {
+                    showMessage(result || "Authentication Failed", "error");
+                }
+            } catch (error) {
+                showMessage("Database error. Is your server running on port 8080?", "error");
+            }
+        });
+    </script>
+</body>
+</html>
