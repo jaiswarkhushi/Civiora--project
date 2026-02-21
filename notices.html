@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Civiora - E-Notices</title>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <a href="dashboard.html">🏠 Dashboard</a>
+        <a href="#">My Profile</a>
+        <a onclick="logout()" style="cursor:pointer;">Logout</a>
+    </div>
+
+    <!-- HEADER -->
+    <div class="top">
+        <h1>📢 E-Notice Board</h1>
+        <p>Stay updated with the latest society announcements</p>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="controls-bar">
+        <input type="text" id="searchInput" placeholder="🔍 Search notices..." oninput="filterNotices()" />
+        <select id="categoryFilter" onchange="filterNotices()">
+            <option value="all">All Categories</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="event">Events</option>
+            <option value="emergency">Emergency</option>
+            <option value="general">General</option>
+        </select>
+        <button class="refresh-btn" onclick="loadNotices()">⟳ Refresh</button>
+    </div>
+
+    <!-- UNREAD BADGE BAR -->
+    <div class="badge-bar">
+        <span id="unreadBadge" class="unread-badge">Loading...</span>
+        <button class="mark-all-btn" onclick="markAllRead()">✔ Mark all as read</button>
+    </div>
+
+    <!-- NOTICES CONTAINER -->
+    <div class="notices-wrapper">
+        <div id="noticesContainer" class="notices-grid">
+            <!-- Notices injected here -->
+        </div>
+        <div id="emptyState" class="empty-state" style="display:none;">
+            <div style="font-size:50px;">📭</div>
+            <p>No notices found.</p>
+        </div>
+    </div>
+
+    <!-- NOTICE DETAIL MODAL -->
+    <div id="modal" class="modal-overlay" onclick="closeModal(event)">
+        <div class="modal-box">
+            <button class="modal-close" onclick="document.getElementById('modal').style.display='none'">✕</button>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+<script>
+// ─── SAMPLE DATA (replace with API call to your Spring Boot backend) ───────────
+// In production: fetch('/api/notices').then(r => r.json()).then(renderNotices)
+
+const SAMPLE_NOTICES = [
+    {
+        id: 1,
+        title: "Water Supply Interruption",
+        category: "maintenance",
+        date: "2026-02-20",
+        author: "Society Secretary",
+        priority: "high",
+        read: false,
+        summary: "Water supply will be interrupted on Feb 22 from 10 AM to 4 PM due to pipeline repairs.",
+        detail: `Dear Residents,\n\nPlease be informed that the water supply will be temporarily interrupted on <b>Sunday, February 22, 2026</b> from <b>10:00 AM to 4:00 PM</b> due to scheduled maintenance on the main pipeline.\n\nKindly store sufficient water in advance. We apologize for the inconvenience caused.\n\nFor any queries, please contact the maintenance office.\n\nRegards,\nSociety Secretary`
+    },
+    {
+        id: 2,
+        title: "Annual General Meeting – 2026",
+        category: "general",
+        date: "2026-02-18",
+        author: "Committee President",
+        priority: "medium",
+        read: false,
+        summary: "AGM is scheduled on March 1, 2026 at 6:00 PM in the Community Hall. All residents are requested to attend.",
+        detail: `Dear Residents,\n\nThe <b>Annual General Meeting (AGM) 2026</b> is scheduled as follows:\n\n📅 Date: March 1, 2026\n⏰ Time: 6:00 PM\n📍 Venue: Community Hall, Ground Floor\n\n<b>Agenda:</b>\n1. Review of Financial Statements 2025\n2. Election of new committee members\n3. Approval of budget for 2026\n4. Open house discussion\n\nYour presence and participation is highly encouraged.\n\nRegards,\nCommittee President`
+    },
+    {
+        id: 3,
+        title: "Holi Celebration 2026 🎨",
+        category: "event",
+        date: "2026-02-15",
+        author: "Event Committee",
+        priority: "low",
+        read: true,
+        summary: "Holi celebrations on March 4 in the society garden. Snacks and colours provided. All welcome!",
+        detail: `Dear Residents,\n\nJoin us for a colourful <b>Holi Celebration 2026!</b>\n\n📅 Date: March 14, 2026\n⏰ Time: 9:00 AM – 1:00 PM\n📍 Venue: Society Garden\n\n🎊 Activities: Traditional colours, music, snacks & refreshments\n\nAll residents including children are warmly welcome. Organic colours will be used.\n\nLet's celebrate together!\n\nEvents Committee, Civiora`
+    },
+    {
+        id: 4,
+        title: "⚠️ Gate Security Update",
+        category: "emergency",
+        date: "2026-02-12",
+        author: "Admin",
+        priority: "high",
+        read: true,
+        summary: "New visitor entry protocol effective immediately. All visitors must show valid ID and register at gate.",
+        detail: `Dear Residents,\n\nEffective <b>immediately</b>, the following security protocol is in place at the main gate:\n\n🪪 All visitors must present a valid government-issued photo ID.\n📝 Visitor entry must be logged in the register.\n📱 Security guard will call the resident before allowing entry.\n🚗 Delivery vehicles will be allowed only up to the parking area.\n\nThis is being implemented for the safety of all residents. Please cooperate with the security staff.\n\nSecurity Head, Civiora`
+    },
+    {
+        id: 5,
+        title: "Maintenance Charges – March 2026",
+        category: "maintenance",
+        date: "2026-02-10",
+        author: "Treasurer",
+        priority: "medium",
+        read: false,
+        summary: "March maintenance charges are due by March 10. Late fee of ₹50/day will apply after the due date.",
+        detail: `Dear Residents,\n\nThis is a reminder that <b>March 2026 maintenance charges</b> are due by <b>March 10, 2026</b>.\n\n💰 Amount: ₹2,500/month\n📅 Due Date: March 10, 2026\n⚠️ Late Fee: ₹50 per day after due date\n\nPayment can be made via:\n• Online portal (Dashboard → Payment)\n• NEFT/UPI to society account\n• Cheque at the office (Mon–Sat, 10AM–12PM)\n\nThank you for your timely payments.\n\nTreasurer, Civiora`
+    }
+];
+
+let allNotices = [...SAMPLE_NOTICES];
+let readSet = new Set(SAMPLE_NOTICES.filter(n => n.read).map(n => n.id));
+
+// ─── LOAD NOTICES ──────────────────────────────────────────────────────────────
+function loadNotices() {
+    // 🔁 In production, replace this block with:
+    // fetch('/api/notices')
+    //   .then(res => res.json())
+    //   .then(data => { allNotices = data; renderNotices(data); updateUnread(); })
+    //   .catch(err => console.error('Error fetching notices:', err));
+
+    renderNotices(allNotices);
+    updateUnread();
+}
+
+function renderNotices(notices) {
+    const container = document.getElementById('noticesContainer');
+    const empty = document.getElementById('emptyState');
+
+    if (!notices.length) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    container.innerHTML = notices.map(n => {
+        const isRead = readSet.has(n.id);
+        return `
+        <div class="notice-card ${isRead ? 'read' : 'unread'} priority-${n.priority}" 
+             onclick="openModal(${n.id})" data-category="${n.category}">
+            <div class="card-header">
+                <span class="category-tag cat-${n.category}">${n.category.toUpperCase()}</span>
+                <span class="priority-dot priority-${n.priority}" title="${n.priority} priority">●</span>
+                ${!isRead ? '<span class="new-label">NEW</span>' : ''}
+            </div>
+            <h3 class="notice-title">${n.title}</h3>
+            <p class="notice-summary">${n.summary}</p>
+            <div class="card-footer">
+                <span>👤 ${n.author}</span>
+                <span>📅 ${formatDate(n.date)}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ─── FILTER ────────────────────────────────────────────────────────────────────
+function filterNotices() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const cat = document.getElementById('categoryFilter').value;
+
+    const filtered = allNotices.filter(n => {
+        const matchSearch = n.title.toLowerCase().includes(search) ||
+                            n.summary.toLowerCase().includes(search);
+        const matchCat = cat === 'all' || n.category === cat;
+        return matchSearch && matchCat;
+    });
+    renderNotices(filtered);
+}
+
+// ─── MODAL ─────────────────────────────────────────────────────────────────────
+function openModal(id) {
+    const notice = allNotices.find(n => n.id === id);
+    if (!notice) return;
+
+    readSet.add(id);
+    updateUnread();
+    renderNotices(allNotices); // refresh read state
+
+    document.getElementById('modalContent').innerHTML = `
+        <span class="category-tag cat-${notice.category} modal-cat">${notice.category.toUpperCase()}</span>
+        <h2 style="margin:10px 0 5px;">${notice.title}</h2>
+        <p style="color:#888;font-size:13px;margin-bottom:20px;">👤 ${notice.author} &nbsp;|&nbsp; 📅 ${formatDate(notice.date)}</p>
+        <div class="modal-body">${notice.detail.replace(/\n/g, '<br>')}</div>
+    `;
+    document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal(e) {
+    if (e.target.id === 'modal') document.getElementById('modal').style.display = 'none';
+}
+
+// ─── MARK ALL READ ─────────────────────────────────────────────────────────────
+function markAllRead() {
+    allNotices.forEach(n => readSet.add(n.id));
+    updateUnread();
+    renderNotices(allNotices);
+}
+
+// ─── UNREAD COUNT ──────────────────────────────────────────────────────────────
+function updateUnread() {
+    const count = allNotices.filter(n => !readSet.has(n.id)).length;
+    const badge = document.getElementById('unreadBadge');
+    badge.textContent = count > 0 ? `🔔 ${count} unread notice${count > 1 ? 's' : ''}` : '✅ All notices read';
+    badge.style.background = count > 0 ? '#b8860b' : '#2e7d32';
+}
+
+// ─── UTILS ─────────────────────────────────────────────────────────────────────
+function formatDate(d) {
+    return new Date(d).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function logout() {
+    sessionStorage.clear();
+    window.location.href = 'login.html';
+}
+
+// ─── STYLES ───────────────────────────────────────────────────────────────────
+const style = document.createElement('style');
+style.textContent = `
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:#f4f4f4; color:#333; min-height:100vh; }
+
+    /* NAVBAR */
+    .navbar { padding:15px; text-align:right; background:#fff; border-bottom:1px solid #ddd; }
+    .navbar a { color:#b8860b; text-decoration:none; font-size:16px; font-weight:700; margin-right:25px; transition:0.3s; }
+    .navbar a:hover { color:#1a1a1a; }
+
+    /* HEADER */
+    .top { text-align:center; padding:50px 20px; background:linear-gradient(135deg,#bd9537 0%,#f9f295 50%,#b8860b 100%); color:#1a1a1a; box-shadow:0 4px 15px rgba(0,0,0,0.1); }
+    .top h1 { font-size:2.2rem; font-weight:800; }
+    .top p { font-size:1rem; margin-top:8px; opacity:0.8; }
+
+    /* CONTROLS */
+    .controls-bar { display:flex; gap:12px; padding:20px 40px; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,0.07); flex-wrap:wrap; align-items:center; }
+    .controls-bar input { flex:1; min-width:200px; padding:10px 16px; border:1px solid #ddd; border-radius:8px; font-size:14px; outline:none; transition:border 0.2s; }
+    .controls-bar input:focus { border-color:#b8860b; }
+    .controls-bar select { padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; cursor:pointer; outline:none; }
+    .refresh-btn { padding:10px 20px; background:#b8860b; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600; transition:0.2s; }
+    .refresh-btn:hover { background:#9a700a; }
+
+    /* BADGE BAR */
+    .badge-bar { display:flex; align-items:center; gap:16px; padding:12px 40px; background:#fafafa; border-bottom:1px solid #eee; }
+    .unread-badge { padding:6px 14px; border-radius:20px; color:#fff; font-size:13px; font-weight:600; transition:background 0.4s; }
+    .mark-all-btn { padding:6px 14px; border:1px solid #b8860b; background:transparent; color:#b8860b; border-radius:20px; font-size:13px; cursor:pointer; font-weight:600; }
+    .mark-all-btn:hover { background:#b8860b; color:#fff; }
+
+    /* GRID */
+    .notices-wrapper { padding:30px 40px; }
+    .notices-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:20px; }
+
+    /* NOTICE CARD */
+    .notice-card { background:#fff; border-radius:12px; padding:20px; cursor:pointer; transition:transform 0.2s, box-shadow 0.2s; border-left:5px solid #ccc; position:relative; }
+    .notice-card:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
+    .notice-card.unread { border-left-color:#b8860b; background:#fffdf4; }
+    .notice-card.read { border-left-color:#ccc; opacity:0.85; }
+    .priority-high.unread { border-left-color:#c62828; background:#fff5f5; }
+    .priority-high.read { border-left-color:#ef9a9a; }
+
+    .card-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+    .category-tag { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; }
+    .cat-maintenance { background:#e3f2fd; color:#1565c0; }
+    .cat-event { background:#e8f5e9; color:#2e7d32; }
+    .cat-emergency { background:#ffebee; color:#c62828; }
+    .cat-general { background:#f3e5f5; color:#6a1b9a; }
+
+    .priority-dot { font-size:18px; }
+    .priority-high .priority-dot, .priority-dot.priority-high { color:#c62828; }
+    .priority-medium .priority-dot, .priority-dot.priority-medium { color:#f57f17; }
+    .priority-low .priority-dot, .priority-dot.priority-low { color:#388e3c; }
+
+    .new-label { margin-left:auto; background:#b8860b; color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:10px; }
+
+    .notice-title { font-size:1rem; font-weight:700; margin-bottom:8px; color:#1a1a1a; }
+    .notice-summary { font-size:13px; color:#555; line-height:1.5; margin-bottom:14px; }
+    .card-footer { display:flex; justify-content:space-between; font-size:12px; color:#888; border-top:1px solid #f0f0f0; padding-top:10px; }
+
+    /* EMPTY STATE */
+    .empty-state { text-align:center; padding:60px; color:#aaa; font-size:16px; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; padding:20px; }
+    .modal-box { background:#fff; border-radius:16px; max-width:600px; width:100%; max-height:80vh; overflow-y:auto; padding:32px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+    .modal-close { position:absolute; top:16px; right:16px; background:none; border:none; font-size:20px; cursor:pointer; color:#888; }
+    .modal-close:hover { color:#333; }
+    .modal-cat { margin-bottom:10px; display:inline-block; }
+    .modal-body { font-size:15px; line-height:1.8; color:#444; margin-top:10px; }
+
+    /* RESPONSIVE */
+    @media(max-width:600px) {
+        .controls-bar, .badge-bar, .notices-wrapper { padding:12px 16px; }
+        .notices-grid { grid-template-columns:1fr; }
+    }
+`;
+document.head.appendChild(style);
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+loadNotices();
+</script>
+</body>
+</html>
